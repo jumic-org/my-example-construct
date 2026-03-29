@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'Resources for publishing a library to AWS including OIDC Provider, IAM Role and CodeArtifact'
+
+Parameters:
+  CodeArtifactDomainName:
+    Description: CodeArtifact domain name.
+    Type: String
+    Default: 'my-domain'
+
+  CodeArtifactRepositoryName:
+    Description: CodeArtifact repository name.
+    Type: String
+    Default: 'my-repo'
+
+  GitHubOrganization:
+    Description: GitHub organization name.
+    Type: String
+    Default: 'jumic-org'
+
+  GitHubRepository:
+    Description: GitHub repository name.
+    Type: String
+    Default: 'my-example-construct'
+
+Resources:
+  GitHubOIDCProvider:
+    Type: 'AWS::IAM::OIDCProvider'
+    Properties:
+      ClientIdList:
+        - 'sts.amazonaws.com'
+      ThumbprintList:
+        - 'd89e3bd43d5d909b47a18977aa9d5ce36cee184c'
+      Url: 'https://token.actions.githubusercontent.com'
+  CodeArtifactDomainDomainmydomain:
+    Type: 'AWS::CodeArtifact::Domain'
+    Properties:
+      DomainName: !Ref CodeArtifactDomainName
+  CodeArtifactRepositoryRepositorymydomainmyrepo:
+    Type: 'AWS::CodeArtifact::Repository'
+    DependsOn: CodeArtifactDomainDomainmydomain
+    Properties:
+      DomainName: !Ref CodeArtifactDomainName
+      RepositoryName: !Ref CodeArtifactRepositoryName
+  IAMRoleGitHubCodeArtifactRole:
+    Type: 'AWS::IAM::Role'
+    DependsOn:
+      - CodeArtifactRepositoryRepositorymydomainmyrepo
+      - GitHubOIDCProvider
+    Properties:
+      MaxSessionDuration: 3600
+      RoleName: 'GitHubCodeArtifactRole'
+      Policies:
+        - PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Resource:
+                  - !Sub 'arn:aws:codeartifact:${AWS::Region}:${AWS::AccountId}:domain/${CodeArtifactDomainName}'
+                  - !Sub 'arn:aws:codeartifact:${AWS::Region}:${AWS::AccountId}:repository/${CodeArtifactDomainName}/${CodeArtifactRepositoryName}'
+                Action:
+                  - 'codeartifact:GetAuthorizationToken'
+                  - 'codeartifact:GetRepositoryEndpoint'
+                  - 'codeartifact:ReadFromRepository'
+                Effect: 'Allow'
+              - Resource:
+                  - !Sub 'arn:aws:codeartifact:${AWS::Region}:${AWS::AccountId}:package/${CodeArtifactDomainName}/${CodeArtifactRepositoryName}/*'
+                Action:
+                  - 'codeartifact:PublishPackageVersion'
+                  - 'codeartifact:PutPackageMetadata'
+                Effect: 'Allow'
+              - Condition:
+                  StringEquals:
+                    sts:AWSServiceName: 'codeartifact.amazonaws.com'
+                Resource: '*'
+                Action: 'sts:GetServiceBearerToken'
+                Effect: 'Allow'
+          PolicyName: 'CodeArtifact'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: 'sts.amazonaws.com'
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubOrganization}/${GitHubRepository}:*'
+            Action: 'sts:AssumeRoleWithWebIdentity'
+            Effect: 'Allow'
+            Principal:
+              Federated: !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com'
