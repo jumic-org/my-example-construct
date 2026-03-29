@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0 (2026-03-29)
+
+
+### Features
+
+* initial version ([da47a0e](https://github.com/jumic-org/my-example-construct/commit/da47a0eef0346d85f1f16b4ab9d17a0194ba177f))
+
 ## 1.0.0 (2026-03-28)
 
 
