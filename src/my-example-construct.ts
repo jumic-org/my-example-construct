@@ -12,7 +12,7 @@ export class MyExampleConstruct extends Construct {
 
     const key = new kms.Key(this, 'MyKey', {
       enableKeyRotation: true,
-    })
+    });
 
     new s3.Bucket(this, 'MyBucket', {
       bucketName: props.bucketName,
