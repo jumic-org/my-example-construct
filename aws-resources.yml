@@ -23,6 +23,11 @@ Parameters:
     Type: String
     Default: 'my-example-construct'
 
+  OIDCRoleName:
+    Description: OIDC Role Name
+    Type: String
+    Default: 'GitHubCodeArtifactRole'
+
 Resources:
   GitHubOIDCProvider:
     Type: 'AWS::IAM::OIDCProvider'
@@ -32,24 +37,24 @@ Resources:
       ThumbprintList:
         - 'd89e3bd43d5d909b47a18977aa9d5ce36cee184c'
       Url: 'https://token.actions.githubusercontent.com'
-  CodeArtifactDomainDomainmydomain:
+  CodeArtifactDomain:
     Type: 'AWS::CodeArtifact::Domain'
     Properties:
       DomainName: !Ref CodeArtifactDomainName
-  CodeArtifactRepositoryRepositorymydomainmyrepo:
+  CodeArtifactRepositoryRepository:
     Type: 'AWS::CodeArtifact::Repository'
-    DependsOn: CodeArtifactDomainDomainmydomain
+    DependsOn: CodeArtifactDomain
     Properties:
       DomainName: !Ref CodeArtifactDomainName
       RepositoryName: !Ref CodeArtifactRepositoryName
   IAMRoleGitHubCodeArtifactRole:
     Type: 'AWS::IAM::Role'
     DependsOn:
-      - CodeArtifactRepositoryRepositorymydomainmyrepo
+      - CodeArtifactRepositoryRepository
       - GitHubOIDCProvider
     Properties:
       MaxSessionDuration: 3600
-      RoleName: 'GitHubCodeArtifactRole'
+      RoleName: !Ref OIDCRoleName
       Policies:
         - PolicyDocument:
             Version: '2012-10-17'
