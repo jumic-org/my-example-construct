@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/jumic-org/my-example-construct/compare/v1.0.0...v1.1.0) (2026-04-27)
+
+
+### Features
+
+* use bucket encryption to improve security ([#12](https://github.com/jumic-org/my-example-construct/issues/12)) ([05682d3](https://github.com/jumic-org/my-example-construct/commit/05682d35dccdf4323c46120a5bfd9fbfa98797a9))
+
+
+### Bug Fixes
+
+* add missing OIDCRoleName option ([#11](https://github.com/jumic-org/my-example-construct/issues/11)) ([1b86fa8](https://github.com/jumic-org/my-example-construct/commit/1b86fa8b9f3e10af7dda1e9b1db965a92fa68bc4))
+
 ## 1.0.0 (2026-03-29)
 
 
