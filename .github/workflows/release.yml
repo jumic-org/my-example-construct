@@ -29,7 +29,7 @@ jobs:
           release-type: node
           token: ${{ steps.app-token.outputs.token }}
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         if: ${{ steps.release.outputs.release_created }}
       - name: Setup Node.js
         uses: actions/setup-node@v6
